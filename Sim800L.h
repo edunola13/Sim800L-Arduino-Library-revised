@@ -126,7 +126,7 @@ public:
     String getLatitude();
 
     bool answerCall();
-    void callNumber(char* number);
+    bool callNumber(char* number);
     bool hangoffCall();
     uint8_t getCallStatus();
 

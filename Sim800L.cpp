@@ -305,7 +305,7 @@ bool Sim800L::calculateLocation()
     this->SoftwareSerial::print("\r");
     */
 
-    String data = _readSerial(20000);
+    String data = _readSerialUntil(20000);
 
     if (data.indexOf("ER")!=(-1)) return false;
 
@@ -414,7 +414,7 @@ String Sim800L::signalQuality()
     99 Not known or not detectable
     */
     this->SoftwareSerial::print (F("AT+CSQ\r\n"));
-    return(_readSerial());
+    return(_readSerialUntil());
 }
 
 
@@ -445,7 +445,8 @@ bool Sim800L::answerCall()
 {
     this->SoftwareSerial::print (F("ATA\r\n"));
     //Response in case of data call, if successfully connected
-    if ( (_readSerial().indexOf("ER")) == -1)
+    _buffer=_readSerialUntil();
+    if ( (_buffer.indexOf("ER")) == -1)
     {
         return false;
     }
@@ -455,11 +456,19 @@ bool Sim800L::answerCall()
 }
 
 
-void  Sim800L::callNumber(char* number)
+bool Sim800L::callNumber(char* number)
 {
     this->SoftwareSerial::print (F("ATD"));
     this->SoftwareSerial::print (number);
     this->SoftwareSerial::print (F(";\r\n"));
+	_buffer=_readSerialUntil();
+    if ( (_buffer.indexOf("ER")) == -1)
+    {
+        return false;
+    }
+    else return true;
+    // Error found, return 1
+    // Error NOT found, return 0
 }
 
 
@@ -486,7 +495,7 @@ uint8_t Sim800L::getCallStatus()
 bool Sim800L::hangoffCall()
 {
     this->SoftwareSerial::print (F("ATH\r\n"));
-    _buffer=_readSerial();
+    _buffer=_readSerialUntil();
     if ( (_buffer.indexOf("ER")) == -1)
     {
         return false;
