@@ -525,8 +525,8 @@ bool Sim800L::sendSms(char* number,char* text)
         this->SoftwareSerial::print((char)26);
         _buffer=_readSerialUntil(60000);
         //expect CMGS:xxx   , where xxx is a number,for the sending sms.
-        //if (_buffer.indexOf("CMGS:") != -1)
-        if ( (_buffer.indexOf("ER")) == -1)
+        if (_buffer.indexOf("CMGS:") != -1)
+        //if ( (_buffer.indexOf("ER")) == -1)
         {
             // IS OK
             return false;
