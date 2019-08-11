@@ -133,6 +133,7 @@ public:
     bool sendSms(char* number,char* text);
     String readSms(uint8_t index);
     String getNumberSms(uint8_t index);
+	bool delSms(uint8_t index, uint8_t option);
     bool delAllSms();
 
 

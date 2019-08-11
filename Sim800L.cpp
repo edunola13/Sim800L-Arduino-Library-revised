@@ -271,7 +271,7 @@ String Sim800L::getOperatorsList()
 
     this->SoftwareSerial::print("AT+COPS=?\r");
 
-    return _readSerial(45000);
+    return _readSerialUntil(45000);
 
 }
 
@@ -280,7 +280,7 @@ String Sim800L::getOperator()
 
     this->SoftwareSerial::print("AT+COPS ?\r");
 
-    return _readSerial();
+    return _readSerialUntil();
 
 }
 
@@ -524,10 +524,9 @@ bool Sim800L::sendSms(char* number,char* text)
         _buffer=_readSerial();
         this->SoftwareSerial::print((char)26);
         _buffer=_readSerialUntil(60000);
-        Serial.println(_buffer);
         //expect CMGS:xxx   , where xxx is a number,for the sending sms.
-        if (_buffer.indexOf("CMGS:") != -1)
-        //if ( (_buffer.indexOf("ER")) == -1)
+        //if (_buffer.indexOf("CMGS:") != -1)
+        if ( (_buffer.indexOf("ER")) == -1)
         {
             // IS OK
             return false;
@@ -578,17 +577,36 @@ String Sim800L::readSms(uint8_t index)
         else return "";
     }
     else {
-        return "";
+        return "ERROR";
     }
 }
 
+
+bool Sim800L::delSms(uint8_t index, uint8_t option)
+{
+    // Can take up to 25 seconds
+
+    this->SoftwareSerial::print(F("at+cmgd="));
+	this->SoftwareSerial::print (index);
+	this->SoftwareSerial::print (",");
+	this->SoftwareSerial::print (option);
+	this->SoftwareSerial::print ("\r");
+    _buffer=_readSerialUntil(25000);
+    if ( (_buffer.indexOf("ER")) == -1)
+    {
+        return false;
+    }
+    else return true;
+    // Error found, return 1
+    // Error NOT found, return 0
+}
 
 bool Sim800L::delAllSms()
 {
     // Can take up to 25 seconds
 
     this->SoftwareSerial::print(F("at+cmgda=\"del all\"\n\r"));
-    _buffer=_readSerial(25000);
+    _buffer=_readSerialUntil(25000);
     if ( (_buffer.indexOf("ER")) == -1)
     {
         return false;
@@ -701,7 +719,7 @@ String Sim800L::_readSerialUntil(uint32_t timeout = TIME_OUT_READ_SERIAL)
     uint64_t timeOld = millis();
     String str;
 
-    while (!str.endsWith("OK\r\n") && !str.endsWith("ERROR\r\n") && !(millis() > timeOld + TIME_OUT_READ_SERIAL))
+    while (!str.endsWith("OK\r\n") && !str.endsWith("ERROR\r\n") && !(millis() > timeOld + timeout))
     {
         while(this->SoftwareSerial::available())
         {
