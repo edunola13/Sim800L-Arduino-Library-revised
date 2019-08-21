@@ -5,19 +5,19 @@
  *  Designed to work with the GSM Sim800L.
  *
  *  ENG
- *      This library uses SoftwareSerial, you can define RX and TX pins
+ *      This library uses NeoSWSerial, you can define RX and TX pins
  *      in the header "Sim800L.h", by default pins are RX=10 and TX=11.
  *      Be sure that GND is connected to arduino too.
  *      You can also change the RESET_PIN as you prefer.
  *
  *  ESP
- *      Esta libreria usa SoftwareSerial, se pueden cambiar los pines de RX y TX
+ *      Esta libreria usa NeoSWSerial, se pueden cambiar los pines de RX y TX
  *      en el archivo header, "Sim800L.h", por defecto los pines vienen configurado en
  *      RX=10 TX=11.
  *      Tambien se puede cambiar el RESET_PIN por otro que prefiera
  *
  *  ITA
- *      Questa libreria utilizza la SoftwareSerial, si possono cambiare i pin di RX e TX
+ *      Questa libreria utilizza la NeoSWSerial, si possono cambiare i pin di RX e TX
  *      dall' intestazione "Sim800L.h", di default essi sono impostati come RX=10 RX=11
  *      Assicurarsi di aver collegato il dispositivo al pin GND di Arduino.
  *      E' anche possibile cambiare il RESET_PIN.
@@ -59,7 +59,7 @@
 
 #ifndef Sim800L_h
 #define Sim800L_h
-#include <SoftwareSerial.h>
+#include <NeoSWSerial.h>
 #include "Arduino.h"
 
 
@@ -75,7 +75,7 @@
 #define TIME_OUT_READ_SERIAL    5000
 
 
-class Sim800L : public SoftwareSerial
+class Sim800L : public NeoSWSerial
 {
 private:
 
@@ -147,6 +147,7 @@ public:
     bool updateRtc(int utc);
     
     String _readSerialUntil(uint32_t timeout = TIME_OUT_READ_SERIAL);
+	String _readSerialUntilTime(uint32_t timeout);
     String _readSerial(uint32_t timeout = TIME_OUT_READ_SERIAL);
 
 };

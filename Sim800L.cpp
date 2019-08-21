@@ -5,19 +5,19 @@
  *  Designed to work with the GSM Sim800L.
  *
  *  ENG
- *      This library uses SoftwareSerial, you can define RX and TX pins
+ *      This library uses NeoSWSerial, you can define RX and TX pins
  *      in the header "Sim800L.h", by default pins are RX=10 and TX=11.
  *      Be sure that GND is connected to arduino too.
  *      You can also change the RESET_PIN as you prefer.
  *
  *  ESP
- *      Esta libreria usa SoftwareSerial, se pueden cambiar los pines de RX y TX
+ *      Esta libreria usa NeoSWSerial, se pueden cambiar los pines de RX y TX
  *      en el archivo header, "Sim800L.h", por defecto los pines vienen configurado en
  *      RX=10 TX=11.
  *      Tambien se puede cambiar el RESET_PIN por otro que prefiera
  *
  *  ITA
- *      Questa libreria utilizza la SoftwareSerial, si possono cambiare i pin di RX e TX
+ *      Questa libreria utilizza la NeoSWSerial, si possono cambiare i pin di RX e TX
  *      dall' intestazione "Sim800L.h", di default essi sono impostati come RX=10 RX=11
  *      Assicurarsi di aver collegato il dispositivo al pin GND di Arduino.
  *      E' anche possibile cambiare il RESET_PIN.
@@ -59,12 +59,12 @@
 
 #include "Arduino.h"
 #include "Sim800L.h"
-#include <SoftwareSerial.h>
+#include <NeoSWSerial.h>
 
-//SoftwareSerial SIM(RX_PIN,TX_PIN);
+//NeoSWSerial SIM(RX_PIN,TX_PIN);
 //String _buffer;
 
-Sim800L::Sim800L(void) : SoftwareSerial(DEFAULT_RX_PIN, DEFAULT_TX_PIN)
+Sim800L::Sim800L(void) : NeoSWSerial(DEFAULT_RX_PIN, DEFAULT_TX_PIN)
 {
     RX_PIN      = DEFAULT_RX_PIN;
     TX_PIN      = DEFAULT_TX_PIN;
@@ -73,7 +73,7 @@ Sim800L::Sim800L(void) : SoftwareSerial(DEFAULT_RX_PIN, DEFAULT_TX_PIN)
     LED_FLAG    = DEFAULT_LED_FLAG;
 }
 
-Sim800L::Sim800L(uint8_t rx, uint8_t tx) : SoftwareSerial(rx, tx)
+Sim800L::Sim800L(uint8_t rx, uint8_t tx) : NeoSWSerial(rx, tx)
 {
     RX_PIN      = rx;
     TX_PIN      = tx;
@@ -82,7 +82,7 @@ Sim800L::Sim800L(uint8_t rx, uint8_t tx) : SoftwareSerial(rx, tx)
     LED_FLAG    = DEFAULT_LED_FLAG;
 }
 
-Sim800L::Sim800L(uint8_t rx, uint8_t tx, uint8_t rst) : SoftwareSerial(rx, tx)
+Sim800L::Sim800L(uint8_t rx, uint8_t tx, uint8_t rst) : NeoSWSerial(rx, tx)
 {
     RX_PIN      = rx;
     TX_PIN      = tx;
@@ -91,7 +91,7 @@ Sim800L::Sim800L(uint8_t rx, uint8_t tx, uint8_t rst) : SoftwareSerial(rx, tx)
     LED_FLAG    = DEFAULT_LED_FLAG;
 }
 
-Sim800L::Sim800L(uint8_t rx, uint8_t tx, uint8_t rst, uint8_t led) : SoftwareSerial(rx, tx)
+Sim800L::Sim800L(uint8_t rx, uint8_t tx, uint8_t rst, uint8_t led) : NeoSWSerial(rx, tx)
 {
     RX_PIN      = rx;
     TX_PIN      = tx;
@@ -106,7 +106,7 @@ void Sim800L::begin()
     pinMode(RESET_PIN, OUTPUT);
 
     _baud = DEFAULT_BAUD_RATE;          // Default baud rate 9600
-    this->SoftwareSerial::begin(_baud);
+    this->NeoSWSerial::begin(_baud);
 
     _sleepMode = 0;
     _functionalityMode = 1;
@@ -122,7 +122,7 @@ void Sim800L::begin(uint32_t baud)
     pinMode(RESET_PIN, OUTPUT);
 
     _baud = baud;
-    this->SoftwareSerial::begin(_baud);
+    this->NeoSWSerial::begin(_baud);
 
     _sleepMode = 0;
     _functionalityMode = 1;
@@ -142,8 +142,8 @@ bool Sim800L::setSleepMode(bool state)
 
     _sleepMode = state;
 
-    if (_sleepMode) this->SoftwareSerial::print(F("AT+CSCLK=1\r\n "));
-    else            this->SoftwareSerial::print(F("AT+CSCLK=0\r\n "));
+    if (_sleepMode) this->NeoSWSerial::print(F("AT+CSCLK=1\r\n "));
+    else            this->NeoSWSerial::print(F("AT+CSCLK=0\r\n "));
 
     if ( (_readSerial().indexOf("ER")) == -1)
     {
@@ -175,13 +175,13 @@ bool Sim800L::setFunctionalityMode(uint8_t fun)
         switch(_functionalityMode)
         {
         case 0:
-            this->SoftwareSerial::print(F("AT+CFUN=0\r\n "));
+            this->NeoSWSerial::print(F("AT+CFUN=0\r\n "));
             break;
         case 1:
-            this->SoftwareSerial::print(F("AT+CFUN=1\r\n "));
+            this->NeoSWSerial::print(F("AT+CFUN=1\r\n "));
             break;
         case 4:
-            this->SoftwareSerial::print(F("AT+CFUN=4\r\n "));
+            this->NeoSWSerial::print(F("AT+CFUN=4\r\n "));
             break;
         }
 
@@ -210,9 +210,9 @@ bool Sim800L::setMessageStorage(String value)
 
     // Can take up to 5 seconds
 
-    this->SoftwareSerial::print(command);
+    this->NeoSWSerial::print(command);
 
-    if ( (_readSerial(5000).indexOf("ER")) == -1)
+    if ( (_readSerialUntil(5000).indexOf("ER")) == -1)
     {
         return true;
     }
@@ -228,9 +228,9 @@ bool Sim800L::setMessageFormat(String value)
 
     // Can take up to 5 seconds
 
-    this->SoftwareSerial::print(command);
+    this->NeoSWSerial::print(command);
 
-    if ( (_readSerial(5000).indexOf("ER")) == -1)
+    if ( (_readSerialUntil(5000).indexOf("ER")) == -1)
     {
         return true;
     }
@@ -246,7 +246,7 @@ bool Sim800L::setPIN(String pin)
 
     // Can take up to 5 seconds
 
-    this->SoftwareSerial::print(command);
+    this->NeoSWSerial::print(command);
 
     if ( (_readSerial(5000).indexOf("ER")) == -1)
     {
@@ -259,7 +259,7 @@ bool Sim800L::setPIN(String pin)
 
 String Sim800L::getProductInfo()
 {
-    this->SoftwareSerial::print("ATI\r");
+    this->NeoSWSerial::print("ATI\r");
     return (_readSerial());
 }
 
@@ -269,7 +269,7 @@ String Sim800L::getOperatorsList()
 
     // Can take up to 45 seconds
 
-    this->SoftwareSerial::print("AT+COPS=?\r");
+    this->NeoSWSerial::print("AT+COPS=?\r");
 
     return _readSerialUntil(45000);
 
@@ -278,7 +278,7 @@ String Sim800L::getOperatorsList()
 String Sim800L::getOperator()
 {
 
-    this->SoftwareSerial::print("AT+COPS ?\r");
+    this->NeoSWSerial::print("AT+COPS ?\r");
 
     return _readSerialUntil();
 
@@ -295,14 +295,14 @@ bool Sim800L::calculateLocation()
     uint8_t cid = 1;
     
     String tmp = "AT+CIPGSMLOC=" + String(type) + "," + String(cid) + "\r\n";
-    this->SoftwareSerial::print(tmp);
+    this->NeoSWSerial::print(tmp);
     
     /*
-    this->SoftwareSerial::print("AT+CIPGSMLOC=");
-    this->SoftwareSerial::print(type);
-    this->SoftwareSerial::print(",");
-    this->SoftwareSerial::print(cid);
-    this->SoftwareSerial::print("\r");
+    this->NeoSWSerial::print("AT+CIPGSMLOC=");
+    this->NeoSWSerial::print(type);
+    this->NeoSWSerial::print(",");
+    this->NeoSWSerial::print(cid);
+    this->NeoSWSerial::print("\r");
     */
 
     String data = _readSerialUntil(20000);
@@ -372,10 +372,10 @@ void Sim800L::reset()
     delay(1000);
     // wait for the module response
 
-    this->SoftwareSerial::print(F("AT\r\n"));
+    this->NeoSWSerial::print(F("AT\r\n"));
     while (_readSerial().indexOf("OK")==-1 )
     {
-        this->SoftwareSerial::print(F("AT\r\n"));
+        this->NeoSWSerial::print(F("AT\r\n"));
     }
 
     //wait for sms ready
@@ -394,7 +394,7 @@ void Sim800L::setPhoneFunctionality()
     4 Disable phone both transmit and receive RF circuits.
     <rst> 1 Reset the MT before setting it to <fun> power level.
     */
-    this->SoftwareSerial::print (F("AT+CFUN=1\r\n"));
+    this->NeoSWSerial::print (F("AT+CFUN=1\r\n"));
 }
 
 
@@ -413,21 +413,21 @@ String Sim800L::signalQuality()
     subclause 7.2.4
     99 Not known or not detectable
     */
-    this->SoftwareSerial::print (F("AT+CSQ\r\n"));
+    this->NeoSWSerial::print (F("AT+CSQ\r\n"));
     return(_readSerialUntil());
 }
 
 
 void Sim800L::activateBearerProfile()
 {
-    this->SoftwareSerial::print (F(" AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\" \r\n" ));
+    this->NeoSWSerial::print (F(" AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\" \r\n" ));
     _buffer=_readSerial();  // set bearer parameter
-    this->SoftwareSerial::print (F(" AT+SAPBR=3,1,\"APN\",\"internet\" \r\n" ));
+    this->NeoSWSerial::print (F(" AT+SAPBR=3,1,\"APN\",\"internet\" \r\n" ));
     _buffer=_readSerial();  // set apn
-    this->SoftwareSerial::print (F(" AT+SAPBR=1,1 \r\n"));
+    this->NeoSWSerial::print (F(" AT+SAPBR=1,1 \r\n"));
     delay(1200);
     _buffer=_readSerial();          // activate bearer context
-    this->SoftwareSerial::print (F(" AT+SAPBR=2,1\r\n "));
+    this->NeoSWSerial::print (F(" AT+SAPBR=2,1\r\n "));
     delay(3000);
     _buffer=_readSerial();          // get context ip address
 }
@@ -435,7 +435,7 @@ void Sim800L::activateBearerProfile()
 
 void Sim800L::deactivateBearerProfile()
 {
-    this->SoftwareSerial::print (F("AT+SAPBR=0,1\r\n "));
+    this->NeoSWSerial::print (F("AT+SAPBR=0,1\r\n "));
     delay(1500);
 }
 
@@ -443,7 +443,7 @@ void Sim800L::deactivateBearerProfile()
 
 bool Sim800L::answerCall()
 {
-    this->SoftwareSerial::print (F("ATA\r\n"));
+    this->NeoSWSerial::print (F("ATA\r\n"));
     //Response in case of data call, if successfully connected
     _buffer=_readSerialUntil();
     if ( (_buffer.indexOf("ER")) == -1)
@@ -458,9 +458,9 @@ bool Sim800L::answerCall()
 
 bool Sim800L::callNumber(char* number)
 {
-    this->SoftwareSerial::print (F("ATD"));
-    this->SoftwareSerial::print (number);
-    this->SoftwareSerial::print (F(";\r\n"));
+    this->NeoSWSerial::print (F("ATD"));
+    this->NeoSWSerial::print (number);
+    this->NeoSWSerial::print (F(";\r\n"));
 	_buffer=_readSerialUntil();
     if ( (_buffer.indexOf("ER")) == -1)
     {
@@ -484,8 +484,8 @@ uint8_t Sim800L::getCallStatus()
      4 Call in progress
 
     */
-    this->SoftwareSerial::print (F("AT+CPAS\r\n"));
-    _buffer=_readSerial();
+    this->NeoSWSerial::print (F("AT+CPAS\r\n"));
+    _buffer=_readSerialUntil();
     return _buffer.substring(_buffer.indexOf("+CPAS: ")+7,_buffer.indexOf("+CPAS: ")+9).toInt();
 
 }
@@ -494,7 +494,7 @@ uint8_t Sim800L::getCallStatus()
 
 bool Sim800L::hangoffCall()
 {
-    this->SoftwareSerial::print (F("ATH\r\n"));
+    this->NeoSWSerial::print (F("ATH\r\n"));
     _buffer=_readSerialUntil();
     if ( (_buffer.indexOf("ER")) == -1)
     {
@@ -511,18 +511,18 @@ bool Sim800L::sendSms(char* number,char* text)
 
     // Can take up to 60 seconds
 
-    this->SoftwareSerial::print (F("AT+CMGF=1\r"));     //set sms to text mode
+    this->NeoSWSerial::print (F("AT+CMGF=1\r"));     //set sms to text mode
     _buffer=_readSerialUntil();
     if ((_buffer.indexOf("ER")) == -1)
     {
-        this->SoftwareSerial::print (F("AT+CMGS=\""));      // command to send sms
-        this->SoftwareSerial::print (number);
-        this->SoftwareSerial::print(F("\"\r"));
+        this->NeoSWSerial::print (F("AT+CMGS=\""));      // command to send sms
+        this->NeoSWSerial::print (number);
+        this->NeoSWSerial::print(F("\"\r"));
         _buffer=_readSerial();
-        this->SoftwareSerial::print (text);
-        this->SoftwareSerial::print ("\r");
+        this->NeoSWSerial::print (text);
+        this->NeoSWSerial::print ("\r");
         _buffer=_readSerial();
-        this->SoftwareSerial::print((char)26);
+        this->NeoSWSerial::print((char)26);
         _buffer=_readSerialUntil(60000);
         //expect CMGS:xxx   , where xxx is a number,for the sending sms.
         if (_buffer.indexOf("CMGS:") != -1)
@@ -562,13 +562,13 @@ String Sim800L::readSms(uint8_t index)
 
     // Can take up to 5 seconds
 
-    this->SoftwareSerial::print (F("AT+CMGF=1\r"));
-
-    if (( _readSerial(5000).indexOf("ER")) ==-1)
+    this->NeoSWSerial::print (F("AT+CMGF=1\r"));
+	_buffer = _readSerialUntil();
+    if (( _buffer.indexOf("ER")) ==-1)
     {
-        this->SoftwareSerial::print (F("AT+CMGR="));
-        this->SoftwareSerial::print (index);
-        this->SoftwareSerial::print ("\r");
+        this->NeoSWSerial::print (F("AT+CMGR="));
+        this->NeoSWSerial::print (index);
+        this->NeoSWSerial::print ("\r");
         _buffer=_readSerialUntil();
         if (_buffer.indexOf("CMGR:")!=-1)
         {
@@ -586,11 +586,11 @@ bool Sim800L::delSms(uint8_t index, uint8_t option)
 {
     // Can take up to 25 seconds
 
-    this->SoftwareSerial::print(F("at+cmgd="));
-	this->SoftwareSerial::print (index);
-	this->SoftwareSerial::print (",");
-	this->SoftwareSerial::print (option);
-	this->SoftwareSerial::print ("\r");
+    this->NeoSWSerial::print(F("at+cmgd="));
+	this->NeoSWSerial::print (index);
+	this->NeoSWSerial::print (",");
+	this->NeoSWSerial::print (option);
+	this->NeoSWSerial::print ("\r");
     _buffer=_readSerialUntil(25000);
     if ( (_buffer.indexOf("ER")) == -1)
     {
@@ -605,7 +605,7 @@ bool Sim800L::delAllSms()
 {
     // Can take up to 25 seconds
 
-    this->SoftwareSerial::print(F("at+cmgda=\"del all\"\n\r"));
+    this->NeoSWSerial::print(F("at+cmgda=\"del all\"\n\r"));
     _buffer=_readSerialUntil(25000);
     if ( (_buffer.indexOf("ER")) == -1)
     {
@@ -619,13 +619,13 @@ bool Sim800L::delAllSms()
 
 void Sim800L::RTCtime(int *day,int *month, int *year,int *hour,int *minute, int *second)
 {
-    this->SoftwareSerial::print(F("at+cclk?\r\n"));
+    this->NeoSWSerial::print(F("at+cclk?\r\n"));
     // if respond with ERROR try one more time.
     _buffer=_readSerial();
     if ((_buffer.indexOf("ERR"))!=-1)
     {
         delay(50);
-        this->SoftwareSerial::print(F("at+cclk?\r\n"));
+        this->NeoSWSerial::print(F("at+cclk?\r\n"));
     }
     if ((_buffer.indexOf("ERR"))==-1)
     {
@@ -642,7 +642,7 @@ void Sim800L::RTCtime(int *day,int *month, int *year,int *hour,int *minute, int 
 //Get the time  of the base of GSM
 String Sim800L::dateNet()
 {
-    this->SoftwareSerial::print(F("AT+CIPGSMLOC=2,1\r\n "));
+    this->NeoSWSerial::print(F("AT+CIPGSMLOC=2,1\r\n "));
     _buffer=_readSerial();
 
     if (_buffer.indexOf("OK")!=-1 )
@@ -698,7 +698,7 @@ bool Sim800L::updateRtc(int utc)
     }
     //for debugging
     //Serial.println("at+cclk=\""+dt.substring(2,4)+"/"+dt.substring(5,7)+"/"+tmp_day+","+tmp_hour+":"+tm.substring(3,5)+":"+tm.substring(6,8)+"-03\"\r\n");
-    this->SoftwareSerial::print("at+cclk=\""+dt.substring(2,4)+"/"+dt.substring(5,7)+"/"+tmp_day+","+tmp_hour+":"+tm.substring(3,5)+":"+tm.substring(6,8)+"-03\"\r\n");
+    this->NeoSWSerial::print("at+cclk=\""+dt.substring(2,4)+"/"+dt.substring(5,7)+"/"+tmp_day+","+tmp_hour+":"+tm.substring(3,5)+":"+tm.substring(6,8)+"-03\"\r\n");
     if ( (_readSerial().indexOf("ER"))!=-1)
     {
         return true;
@@ -711,7 +711,7 @@ bool Sim800L::updateRtc(int utc)
 
 
 //
-//PRIVATE METHODS
+//NO MORE PRIVATE METHODS
 //
 String Sim800L::_readSerialUntil(uint32_t timeout = TIME_OUT_READ_SERIAL)
 {
@@ -721,13 +721,37 @@ String Sim800L::_readSerialUntil(uint32_t timeout = TIME_OUT_READ_SERIAL)
 
     while (!str.endsWith("OK\r\n") && !str.endsWith("ERROR\r\n") && !(millis() > timeOld + timeout))
     {
-        while(this->SoftwareSerial::available())
+        while(this->NeoSWSerial::available())
         {
-            if (this->SoftwareSerial::available()>0)
+            if (this->NeoSWSerial::available()>0)
             {
-                str += (char) this->SoftwareSerial::read();
+                str += (char) this->NeoSWSerial::read();
             }
         }       
+    }
+
+    return str;
+
+}
+
+// After read a char reset the millis. It is for read line in the first try
+// timeout can be a low number, example = 10
+String Sim800L::_readSerialUntilTime(uint32_t timeout)
+{
+
+    uint64_t timeOld = millis();
+    String str;
+
+    while (!(millis() > timeOld + timeout))
+    {
+        while(this->NeoSWSerial::available())
+        {
+            if (this->NeoSWSerial::available()>0)
+            {
+                str += (char) this->NeoSWSerial::read();
+            }
+			timeOld = millis();
+        }		
     }
 
     return str;
@@ -739,18 +763,18 @@ String Sim800L::_readSerial(uint32_t timeout = TIME_OUT_READ_SERIAL)
 
     uint64_t timeOld = millis();
 
-    while (!this->SoftwareSerial::available() && !(millis() > timeOld + timeout))
+    while (!this->NeoSWSerial::available() && !(millis() > timeOld + timeout))
     {
         delay(13);
     }
 
     String str;
 
-    while(this->SoftwareSerial::available())
+    while(this->NeoSWSerial::available())
     {
-        if (this->SoftwareSerial::available()>0)
+        if (this->NeoSWSerial::available()>0)
         {
-            str += (char) this->SoftwareSerial::read();
+            str += (char) this->NeoSWSerial::read();
         }
     }
 
