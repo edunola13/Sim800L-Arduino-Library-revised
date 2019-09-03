@@ -229,8 +229,8 @@ bool Sim800L::setMessageFormat(String value)
     // Can take up to 5 seconds
 
     this->NeoSWSerial::print(command);
-
-    if ( (_readSerialUntil(5000).indexOf("ER")) == -1)
+	_buffer = _readSerialUntil(5000);
+    if ( (_buffer.indexOf("ER")) == -1)
     {
         return true;
     }
