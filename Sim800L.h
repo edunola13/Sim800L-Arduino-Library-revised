@@ -81,7 +81,7 @@ private:
 
     uint32_t _baud;
     int _timeout;
-    String _buffer;
+    // String _buffer;
     bool _sleepMode;
     uint8_t _functionalityMode;
     String _locationCode;
