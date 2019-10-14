@@ -237,6 +237,25 @@ bool Sim800L::setMessageFormat(String value)
     return false;
 }
 
+bool Sim800L::setClip(String value)
+{
+	// Activamos (1) o desactivamos (0) la deteccion de llamadas
+    String command;
+    command  = "AT+CLIP=";
+    command += value;
+    command += "\r\n";
+
+    // Can take up to 5 seconds
+
+    this->NeoSWSerial::print(command);
+	String _buffer = _readSerialUntil(5000);
+    if ( (_buffer.indexOf("ER")) == -1)
+    {
+        return true;
+    }
+    return false;
+}
+
 bool Sim800L::setPIN(String pin)
 {
     String command;
@@ -581,6 +600,35 @@ String Sim800L::readSms(uint8_t index)
     }
 }
 
+void Sim800L::readSmsReference(uint8_t index, String& buffer, int max=1000)
+{
+
+    // Can take up to 5 seconds
+
+    this->NeoSWSerial::print (F("AT+CMGF=1\r"));
+	_readSerialUntilReference(buffer, max);
+    if (( buffer.indexOf("ER")) ==-1)
+    {
+        this->NeoSWSerial::print (F("AT+CMGR="));
+        this->NeoSWSerial::print (index);
+        this->NeoSWSerial::print ("\r");
+		buffer = "";
+        _readSerialUntilReference(buffer, max);
+        if (buffer.indexOf("CMGR:")!=-1)
+        {
+            return buffer;
+        }
+        else {
+			buffer = "";
+			return "";
+		}
+    }
+    else {
+		buffer = "ERROR";
+        return "ERROR";
+    }
+}
+
 
 bool Sim800L::delSms(uint8_t index, uint8_t option)
 {
@@ -731,6 +779,39 @@ String Sim800L::_readSerialUntil(uint32_t timeout = TIME_OUT_READ_SERIAL)
     }
 
     return str;
+
+}
+
+void Sim800L::_readSerialUntilReference(String& buffer, int max=1000, uint32_t timeout = TIME_OUT_READ_SERIAL)
+{
+
+    uint64_t timeOld = millis();
+	
+	while (!buffer.endsWith("OK\r\n") && !buffer.endsWith("ERROR\r\n") && !(millis() > timeOld + timeout) && buffer.length() < max)
+    {
+        while(this->NeoSWSerial::available() && buffer.length() < max)
+        {
+            if (this->NeoSWSerial::available()>0)
+            {
+                buffer += (char) this->NeoSWSerial::read();
+            }
+        }       
+    }
+	
+    String str = buffer.substring(buffer.length() - 6);
+    while (!str.endsWith("OK\r\n") && !str.endsWith("ERROR\r\n") && !(millis() > timeOld + timeout))
+    {
+        while(this->NeoSWSerial::available())
+        {
+            if (this->NeoSWSerial::available()>0)
+            {
+                str += (char) this->NeoSWSerial::read();
+            }
+			if (str.length() > 50) {
+				str = str.substring(str.length() - 6);
+			}
+        }       
+    }
 
 }
 

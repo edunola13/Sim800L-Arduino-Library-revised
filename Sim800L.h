@@ -113,6 +113,7 @@ public:
     uint8_t getFunctionalityMode();
     bool Sim800L::setMessageStorage(String value);
     bool Sim800L::setMessageFormat(String value);
+	bool Sim800L::setClip(String value);
 
     bool setPIN(String pin);
     String getProductInfo();
@@ -132,6 +133,7 @@ public:
 
     bool sendSms(char* number,char* text);
     String readSms(uint8_t index);
+	void readSmsReference(uint8_t index, String& buffer, int max=1000);
     String getNumberSms(uint8_t index);
 	bool delSms(uint8_t index, uint8_t option);
     bool delAllSms();
@@ -147,6 +149,7 @@ public:
     bool updateRtc(int utc);
     
     String _readSerialUntil(uint32_t timeout = TIME_OUT_READ_SERIAL);
+	void _readSerialUntilReference(String& buffer, int max=1000, uint32_t timeout = TIME_OUT_READ_SERIAL);
 	String _readSerialUntilTime(uint32_t timeout);
     String _readSerial(uint32_t timeout = TIME_OUT_READ_SERIAL);
 
